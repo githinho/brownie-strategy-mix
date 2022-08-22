@@ -96,22 +96,16 @@ contract Strategy is BaseStrategy {
         sellComp();
 
         uint256 totalDebt = vault.strategies(address(this)).totalDebt;
-        uint256 totalAssetsAfterProfit = estimatedTotalAssets();
-        _profit = totalAssetsAfterProfit > totalDebt
-            ? totalAssetsAfterProfit.sub(totalDebt)
-            : 0;
+        uint256 totalAssets = estimatedTotalAssets();
 
-        if (_debtOutstanding > 0) {
-            (_debtPayment, _loss) = liquidatePosition(_debtOutstanding);
-        }
-        // Net profit and loss calculation
-        if (_loss > _profit) {
-            _loss = _loss.sub(_profit);
-            _profit = 0;
+        if (totalAssets >= totalDebt) {
+            _profit = totalAssets.sub(totalDebt);
         } else {
-            _profit = _profit.sub(_loss);
-            _loss = 0;
+            _loss = totalDebt.sub(totalAssets);
         }
+        (uint256 _liquidatedAmount, ) =
+            liquidatePosition(_debtOutstanding.add(_profit));
+        _debtPayment = Math.min(_debtOutstanding, _liquidatedAmount);
     }
 
     // NOTE: Try to adjust positions so that `_debtOutstanding` can be freed up on *next* harvest (not immediately)
