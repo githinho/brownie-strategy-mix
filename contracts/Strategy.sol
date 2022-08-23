@@ -141,7 +141,13 @@ contract Strategy is BaseStrategy {
                 balanceOfcToken()
             );
             MORPHO.withdraw(cTokenAdd, _liquidatedAmount);
-            _loss = _amountNeeded.sub(_liquidatedAmount);
+            _liquidatedAmount = Math.min(
+                want.balanceOf(address(this)),
+                _amountNeeded
+            );
+            _loss = _amountNeeded > _liquidatedAmount
+                ? _amountNeeded.sub(_liquidatedAmount)
+                : 0;
         } else {
             _liquidatedAmount = _amountNeeded;
         }
@@ -161,7 +167,7 @@ contract Strategy is BaseStrategy {
         claimComp();
         // sellComp();
         IERC20 comp = IERC20(COMP);
-        comp.transfer(_newStrategy, comp.balanceOf(address(this)));
+        comp.safeTransfer(_newStrategy, comp.balanceOf(address(this)));
     }
 
     function protectedTokens()
