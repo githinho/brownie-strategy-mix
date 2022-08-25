@@ -41,7 +41,13 @@ def test_profitable_harvest_using_yswap(
     token_in = comp_token
     token_out = token
     amount_in = token_in.balanceOf(strategy)
-    asyncTradeExecutionDetails = [strategy.address, token_in.address, token_out.address, amount_in, 1]
+    asyncTradeExecutionDetails = [
+        strategy.address,
+        token_in.address,
+        token_out.address,
+        amount_in,
+        1,
+    ]
 
     # TODO: encode path
     # path = [token_in.address, weth.address, token_out.address]
