@@ -45,7 +45,8 @@ def test_emergency_exit(
 
 
 def test_profitable_harvest(
-    chain, accounts, token, vault, strategy, user, strategist, amount, RELATIVE_APPROX, comp_token, comp_whale
+    chain, accounts, token, vault, strategy, user, strategist, amount, RELATIVE_APPROX, comp_token, comp_whale,
+    disable_trade_factory # disable trade factory to enable swapping reward(comp) token
 ):
     # Deposit to the vault
     token.approve(vault.address, amount, {"from": user})

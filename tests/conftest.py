@@ -113,11 +113,22 @@ def vault(pm, gov, rewards, guardian, management, token):
 
 
 @pytest.fixture
-def strategy(strategist, keeper, vault, cToken, Strategy, gov):
+def strategy(strategist, keeper, vault, cToken, Strategy, gov, trade_factory, ymechs_safe):
     strategy = strategist.deploy(Strategy, vault, cToken, "StrategyMorphoUSDT")
     strategy.setKeeper(keeper)
     vault.addStrategy(strategy, 10_000, 0, 2**256 - 1, 1_000, {"from": gov})
+    trade_factory.grantRole(
+        trade_factory.STRATEGY(),
+        strategy.address,
+        {"from": ymechs_safe, "gas_price": "0 gwei"},
+    )
+    strategy.setTradeFactory(trade_factory.address, {"from": gov})
     yield strategy
+
+
+@pytest.fixture
+def disable_trade_factory(strategy, gov):
+    strategy.removeTradeFactoryPermissions({"from": gov})
 
 
 @pytest.fixture(scope="session")
