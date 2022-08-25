@@ -127,8 +127,13 @@ def strategy(strategist, keeper, vault, cToken, Strategy, gov, trade_factory, ym
 
 
 @pytest.fixture
-def disable_trade_factory(strategy, gov):
-    strategy.removeTradeFactoryPermissions({"from": gov})
+def uni_address():
+    yield "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D"
+
+
+@pytest.fixture
+def sushi_address():
+    yield "0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F"
 
 
 @pytest.fixture(scope="session")

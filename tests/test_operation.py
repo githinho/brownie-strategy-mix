@@ -45,8 +45,7 @@ def test_emergency_exit(
 
 
 def test_profitable_harvest(
-    chain, accounts, token, vault, strategy, user, strategist, amount, RELATIVE_APPROX, comp_token, comp_whale,
-    disable_trade_factory # disable trade factory to enable swapping reward(comp) token
+    chain, accounts, token, vault, strategy, user, strategist, gov, amount, RELATIVE_APPROX, comp_token, comp_whale,
 ):
     # Deposit to the vault
     token.approve(vault.address, amount, {"from": user})
@@ -60,8 +59,10 @@ def test_profitable_harvest(
     strategy.harvest()
     assert pytest.approx(strategy.estimatedTotalAssets(), rel=RELATIVE_APPROX) == amount
 
-    # TODO: Add some code before harvest #2 to simulate earning yield
+    # Strategy earned reward tokens
     comp_token.transfer(strategy, 2 * strategy.minCompToClaimOrSell(), {'from': comp_whale})
+    # Disable trade factory so strategy can swap reward tokens to want tokens using sushiswap as fallback option
+    strategy.removeTradeFactoryPermissions({"from": gov})
 
     # Harvest 2: Realize profit
     chain.sleep(1)

@@ -263,7 +263,7 @@ contract Strategy is BaseStrategy {
      * @notice
      *  Set the minimum amount of compount token need to claim or sell it for `want` token.
      */
-    function setMinCompToSell(uint256 _minCompToClaimOrSell)
+    function setMinCompToClaimOrSell(uint256 _minCompToClaimOrSell)
         external
         onlyAuthorized
     {
@@ -307,7 +307,7 @@ contract Strategy is BaseStrategy {
         if (tradeFactory != address(0)) {
             _removeTradeFactoryPermissions();
         }
-        IERC20(COMP).safeApprove(_tradeFactory, type(uint256).max);
+        IERC20(COMP).safeApprove(_tradeFactory, type(uint96).max);
         ITradeFactory tf = ITradeFactory(_tradeFactory);
         tf.enable(COMP, address(want));
         tradeFactory = _tradeFactory;
