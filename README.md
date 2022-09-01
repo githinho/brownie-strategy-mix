@@ -5,16 +5,14 @@
 This repo contains a strategy for [Morpho protocol](https://morpho.xyz/) on Ethereum mainnet.
 The strategy supplies strategy `want` token to Morpho protocol. If the protocol can find a match from the borrowing side
 it connects two sides for a peer-to-peer deal providing [better APY for both sides](https://docs.morpho.xyz/start-here/how-it-works).
-Otherwise, the liquidity is supplied to the underlying protocol, currently, only Compound, which provides lower APY and
-reward tokens COMP which are swapped for strategy `want` token using ySwap.
-There is also a fallback option to use Sushi v2 or Uniswap v2 if ySwap is not set.
+Otherwise, the liquidity is supplied to the underlying protocol Aave.
 When a new borrower comes in, he is matched with the highest liquidity supplier.
 This flow goes until the full p2p liquidity is matched or all provided gas is used.
 
 ### Want token - USDT
 
 The strategy and tests are written with `USDT` as `want` token. Strategy can be easily changed to use other tokens like
-`USDC`, `UNI` by just changing strategy constructor parameters.
+`USDC`, `WBTC` by just changing strategy constructor parameters.
 For more tokens see [Morpho protocol dashboard](https://compound.morpho.xyz/?network=mainnet).
 
 ### External calls to Morpho

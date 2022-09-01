@@ -11,9 +11,4 @@ interface IMorpho {
     ) external;
 
     function withdraw(address _poolTokenAddress, uint256 _amount) external;
-
-    function claimRewards(
-        address[] calldata _cTokenAddresses,
-        bool _tradeForMorphoToken
-    ) external returns (uint256 claimedAmount);
 }

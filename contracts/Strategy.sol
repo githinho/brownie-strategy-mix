@@ -20,72 +20,33 @@ import "@openzeppelin/contracts/math/Math.sol";
 
 import "../interfaces/IMorpho.sol";
 import "../interfaces/ILens.sol";
-import "../interfaces/IUniswapV2Router01.sol";
-import "../interfaces/ySwap/ITradeFactory.sol";
 
 contract Strategy is BaseStrategy {
     using SafeERC20 for IERC20;
     using Address for address;
     using SafeMath for uint256;
 
-    //ySwap TradeFactory:
-    address public tradeFactory;
     // Morpho is a contract to handle interaction with the protocol
-    IMorpho public immutable morpho;
+    IMorpho public constant MORPHO =
+        IMorpho(0x777777c9898D384F785Ee44Acfe945efDFf5f3E0);
     // Lens is a contract to fetch data about Morpho protocol
-    ILens public immutable lens;
+    ILens public constant LENS =
+        ILens(0x507fA343d0A90786d86C7cd885f5C49263A91FF4);
     // poolTokenAddress address of underlying pool token used in Morpho, e.g. aUSDT for Aave
     address public immutable poolTokenAdd;
-    // reward token from underlying protocol
-    address public immutable rewardToken;
     address public constant WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
-    // Router used for swapping reward token
-    IUniswapV2Router01 public currentV2Router;
     // Max gas used for matching with p2p deals
     uint256 public maxGasForMatching = 100000;
-    // Minimum amount of reward token to be claimed or sold
-    uint256 public minRewardTokenToClaimOrSell = 0.1 ether;
-
     string internal strategyName;
 
-    IUniswapV2Router01 private constant UNI_V2_ROUTER =
-        IUniswapV2Router01(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
-    IUniswapV2Router01 private constant SUSHI_V2_ROUTER =
-        IUniswapV2Router01(0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F);
-
-    /**
-     * @notice
-     *  Constructor for Morpho strategy contract
-     *
-     * @param _vault address token used for vault
-     * @param _morpho address of Morpho protocol contract used for strategy write calls
-     * @param _lens address of Lens contract used for fetching data about Morpho protocol
-     * @param _poolTokenAdd address of underlying pool token used in Morpho, e.g. aUSDT for Aave
-     * @param _strategyName string name of the strategy
-     **/
     constructor(
         address _vault,
-        IMorpho _morpho,
-        ILens _lens,
         address _poolTokenAdd,
-        address _rewardToken,
         string memory _strategyName
     ) public BaseStrategy(_vault) {
-        morpho = _morpho;
-        lens = _lens;
         poolTokenAdd = _poolTokenAdd;
         strategyName = _strategyName;
-        want.safeApprove(address(_morpho), type(uint256).max);
-        currentV2Router = SUSHI_V2_ROUTER;
-        rewardToken = _rewardToken;
-        if (_rewardToken != address(0)) {
-            IERC20 iRewardToken = IERC20(_rewardToken);
-            iRewardToken.safeApprove(
-                address(SUSHI_V2_ROUTER),
-                type(uint256).max
-            );
-            iRewardToken.safeApprove(address(UNI_V2_ROUTER), type(uint256).max);
-        }
+        want.safeApprove(address(MORPHO), type(uint256).max);
     }
 
     // ******** BaseStrategy overriden contract function ************
@@ -109,11 +70,6 @@ contract Strategy is BaseStrategy {
             uint256 _debtPayment
         )
     {
-        if (rewardToken != address(0)) {
-            claimReward();
-            sellReward();
-        }
-
         uint256 totalDebt = vault.strategies(address(this)).totalDebt;
         uint256 totalAssetsAfterProfit = estimatedTotalAssets();
         _profit = totalAssetsAfterProfit > totalDebt
@@ -139,7 +95,7 @@ contract Strategy is BaseStrategy {
     function adjustPosition(uint256 _debtOutstanding) internal override {
         uint256 wantBalance = want.balanceOf(address(this));
         if (wantBalance > _debtOutstanding) {
-            morpho.supply(
+            MORPHO.supply(
                 poolTokenAdd,
                 address(this),
                 wantBalance.sub(_debtOutstanding),
@@ -159,7 +115,7 @@ contract Strategy is BaseStrategy {
                 _amountNeeded.sub(wantBalance),
                 balanceOfPoolToken()
             );
-            morpho.withdraw(poolTokenAdd, _liquidatedAmount);
+            MORPHO.withdraw(poolTokenAdd, _liquidatedAmount);
             _liquidatedAmount = Math.min(
                 want.balanceOf(address(this)),
                 _amountNeeded
@@ -175,7 +131,7 @@ contract Strategy is BaseStrategy {
     function liquidateAllPositions() internal override returns (uint256) {
         uint256 balanceToWithdraw = balanceOfPoolToken();
         if (balanceToWithdraw > 0) {
-            morpho.withdraw(poolTokenAdd, balanceToWithdraw);
+            MORPHO.withdraw(poolTokenAdd, balanceToWithdraw);
         }
         return want.balanceOf(address(this));
     }
@@ -183,14 +139,6 @@ contract Strategy is BaseStrategy {
     // NOTE: Can override `tendTrigger` and `harvestTrigger` if necessary
     function prepareMigration(address _newStrategy) internal override {
         liquidateAllPositions();
-        if (rewardToken != address(0)) {
-            claimReward();
-            IERC20 iRewardToken = IERC20(rewardToken);
-            iRewardToken.safeTransfer(
-                _newStrategy,
-                iRewardToken.balanceOf(address(this))
-            );
-        }
     }
 
     function protectedTokens()
@@ -231,7 +179,7 @@ contract Strategy is BaseStrategy {
      * @notice
      *  Set the maximum amount of gas to consume to get matched in peer-to-peer.
      * @dev
-     *  This value is needed in morpho supply liquidity calls.
+     *  This value is needed in MORPHO supply liquidity calls.
      *  Supplyed liquidity goes to loop with current loans on underlying protocol (Aave or Compound)
      *  and creates a match for p2p deals. The loop starts from bigger liquidity deals.
      * @param _maxGasForMatching new maximum gas value for
@@ -252,100 +200,9 @@ contract Strategy is BaseStrategy {
      * @return _balance of `want` token supplied to Morpho in `want` precision
      */
     function balanceOfPoolToken() public view returns (uint256 _balance) {
-        (, , _balance) = lens.getCurrentSupplyBalanceInOf(
+        (, , _balance) = LENS.getCurrentSupplyBalanceInOf(
             poolTokenAdd,
             address(this)
         );
-    }
-
-    function claimReward() internal {
-        address[] memory pools = new address[](1);
-        pools[0] = poolTokenAdd;
-        if (
-            lens.getUserUnclaimedRewards(pools, address(this)) >
-            minRewardTokenToClaimOrSell
-        ) {
-            // claim the underlying pool's rewards
-            morpho.claimRewards(pools, false);
-        }
-    }
-
-    // ******** functions for selling reward token ********
-
-    /**
-     * @notice
-     *  Set toggle v2 swap router between sushiv2 and univ2
-     */
-    function setToggleV2Router() external onlyAuthorized {
-        currentV2Router = currentV2Router == SUSHI_V2_ROUTER
-            ? UNI_V2_ROUTER
-            : SUSHI_V2_ROUTER;
-    }
-
-    /**
-     * @notice
-     *  Set the minimum amount of reward token need to claim or sell it for `want` token.
-     */
-    function setMinRewardTokenToClaimOrSell(
-        uint256 _minRewardTokenToClaimOrSell
-    ) external onlyAuthorized {
-        minRewardTokenToClaimOrSell = _minRewardTokenToClaimOrSell;
-    }
-
-    function sellReward() internal {
-        if (tradeFactory == address(0)) {
-            uint256 rewardBalance =
-                IERC20(rewardToken).balanceOf(address(this));
-            if (rewardBalance > minRewardTokenToClaimOrSell) {
-                currentV2Router.swapExactTokensForTokens(
-                    rewardBalance,
-                    0,
-                    getTokenOutPathV2(rewardToken, address(want)),
-                    address(this),
-                    block.timestamp
-                );
-            }
-        }
-    }
-
-    function getTokenOutPathV2(address _tokenIn, address _tokenOut)
-        internal
-        pure
-        returns (address[] memory _path)
-    {
-        bool isWeth = _tokenIn == address(WETH) || _tokenOut == address(WETH);
-        _path = new address[](isWeth ? 2 : 3);
-        _path[0] = _tokenIn;
-
-        if (isWeth) {
-            _path[1] = _tokenOut;
-        } else {
-            _path[1] = address(WETH);
-            _path[2] = _tokenOut;
-        }
-    }
-
-    // ---------------------- YSWAPS FUNCTIONS ----------------------
-    function setTradeFactory(address _tradeFactory) external onlyGovernance {
-        if (rewardToken != address(0)) {
-            if (tradeFactory != address(0)) {
-                _removeTradeFactoryPermissions();
-            }
-            IERC20(rewardToken).safeApprove(_tradeFactory, type(uint256).max);
-            ITradeFactory tf = ITradeFactory(_tradeFactory);
-            tf.enable(rewardToken, address(want));
-            tradeFactory = _tradeFactory;
-        }
-    }
-
-    function removeTradeFactoryPermissions() external onlyEmergencyAuthorized {
-        _removeTradeFactoryPermissions();
-    }
-
-    function _removeTradeFactoryPermissions() internal {
-        if (rewardToken != address(0)) {
-            IERC20(rewardToken).safeApprove(tradeFactory, 0);
-        }
-        tradeFactory = address(0);
     }
 }

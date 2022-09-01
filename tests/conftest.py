@@ -65,33 +65,8 @@ def amount(accounts, token, user, token_whale):
 
 @pytest.fixture
 def poolToken():
-    token_address = "0x3Ed3B47Dd13EC9a98b44e6204A523E766B225811"    #aUSDT
-    # token_address = "0xf650C3d88D12dB855b8bf7D11Be6C55A4e07dCC9"  # cUSDT
-    # token_address = "0x39AA39c021dfbaE8faC545936693aC917d5E7563" # cUSDC
+    token_address = "0x3Ed3B47Dd13EC9a98b44e6204A523E766B225811"  # aUSDT
     yield Contract(token_address)
-
-
-@pytest.fixture
-def trade_factory():
-    yield Contract("0x7BAF843e06095f68F4990Ca50161C2C4E4e01ec6")
-
-
-@pytest.fixture
-def ymechs_safe():
-    yield Contract("0x2C01B4AD51a67E2d8F02208F54dF9aC4c0B778B6")
-
-
-@pytest.fixture
-def reward_token():
-    token_address = "0x0000000000000000000000000000000000000000"
-    yield token_address
-
-
-@pytest.fixture
-def comp_whale(accounts):
-    yield accounts.at(
-        "0x5608169973d639649196a84ee4085a708bcbf397", force=True
-    )  # Compound: Team 3
 
 
 @pytest.fixture
@@ -118,29 +93,11 @@ def vault(pm, gov, rewards, guardian, management, token):
 
 
 @pytest.fixture
-def strategy(
-    strategist, keeper, vault, poolToken, Strategy, gov, trade_factory, ymechs_safe, reward_token
-):
-    strategy = strategist.deploy(Strategy, vault, "0x777777c9898D384F785Ee44Acfe945efDFf5f3E0", "0x507fA343d0A90786d86C7cd885f5C49263A91FF4", poolToken, reward_token, "StrategyMorphoUSDT")
+def strategy(strategist, keeper, vault, poolToken, Strategy, gov):
+    strategy = strategist.deploy(Strategy, vault, poolToken, "StrategyMorphoAaveUSDT")
     strategy.setKeeper(keeper)
     vault.addStrategy(strategy, 10_000, 0, 2**256 - 1, 1_000, {"from": gov})
-    trade_factory.grantRole(
-        trade_factory.STRATEGY(),
-        strategy.address,
-        {"from": ymechs_safe, "gas_price": "0 gwei"},
-    )
-    strategy.setTradeFactory(trade_factory.address, {"from": gov})
     yield strategy
-
-
-@pytest.fixture
-def uniswap_address():
-    yield "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D"
-
-
-@pytest.fixture
-def sushiswap_address():
-    yield "0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F"
 
 
 @pytest.fixture(scope="session")
