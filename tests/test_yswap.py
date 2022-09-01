@@ -14,7 +14,7 @@ def test_profitable_harvest_using_yswap(
     gov,
     amount,
     RELATIVE_APPROX,
-    comp_token,
+    reward_token,
     comp_whale,
     trade_factory,
     weth,
@@ -33,12 +33,12 @@ def test_profitable_harvest_using_yswap(
     assert pytest.approx(strategy.estimatedTotalAssets(), rel=RELATIVE_APPROX) == amount
 
     # Strategy earned reward tokens
-    comp_token.transfer(
-        strategy, 2 * strategy.minCompToClaimOrSell(), {"from": comp_whale}
-    )
+    # reward_token.transfer(
+    #     strategy, 2 * strategy.minRewardTokenToClaimOrSell(), {"from": comp_whale}
+    # )
 
     # Prepare ySwap data
-    token_in = comp_token
+    token_in = reward_token
     token_out = token
     amount_in = token_in.balanceOf(strategy)
     asyncTradeExecutionDetails = [
@@ -83,8 +83,8 @@ def test_profitable_harvest_using_yswap(
     assert vault.pricePerShare() > before_pps
 
 
-def test_disabling_trade_factory(strategy, comp_token, gov, trade_factory):
+def test_disabling_trade_factory(strategy, reward_token, gov, trade_factory):
     assert strategy.tradeFactory() == trade_factory.address
     strategy.removeTradeFactoryPermissions({"from": gov})
     assert strategy.tradeFactory() == "0x0000000000000000000000000000000000000000"
-    assert comp_token.allowance(strategy.address, trade_factory.address) == 0
+    assert reward_token.allowance(strategy.address, trade_factory.address) == 0

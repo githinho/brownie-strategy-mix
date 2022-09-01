@@ -64,8 +64,9 @@ def amount(accounts, token, user, token_whale):
 
 
 @pytest.fixture
-def cToken():
-    token_address = "0xf650C3d88D12dB855b8bf7D11Be6C55A4e07dCC9"  # cUSDT
+def poolToken():
+    token_address = "0x3Ed3B47Dd13EC9a98b44e6204A523E766B225811"    #aUSDT
+    # token_address = "0xf650C3d88D12dB855b8bf7D11Be6C55A4e07dCC9"  # cUSDT
     # token_address = "0x39AA39c021dfbaE8faC545936693aC917d5E7563" # cUSDC
     yield Contract(token_address)
 
@@ -81,9 +82,9 @@ def ymechs_safe():
 
 
 @pytest.fixture
-def comp_token():
-    token_address = "0xc00e94Cb662C3520282E6f5717214004A7f26888"
-    yield Contract(token_address)
+def reward_token():
+    token_address = "0x0000000000000000000000000000000000000000"
+    yield token_address
 
 
 @pytest.fixture
@@ -118,9 +119,9 @@ def vault(pm, gov, rewards, guardian, management, token):
 
 @pytest.fixture
 def strategy(
-    strategist, keeper, vault, cToken, Strategy, gov, trade_factory, ymechs_safe
+    strategist, keeper, vault, poolToken, Strategy, gov, trade_factory, ymechs_safe, reward_token
 ):
-    strategy = strategist.deploy(Strategy, vault, cToken, "StrategyMorphoUSDT")
+    strategy = strategist.deploy(Strategy, vault, "0x777777c9898D384F785Ee44Acfe945efDFf5f3E0", "0x507fA343d0A90786d86C7cd885f5C49263A91FF4", poolToken, reward_token, "StrategyMorphoUSDT")
     strategy.setKeeper(keeper)
     vault.addStrategy(strategy, 10_000, 0, 2**256 - 1, 1_000, {"from": gov})
     trade_factory.grantRole(
@@ -133,12 +134,12 @@ def strategy(
 
 
 @pytest.fixture
-def uni_address():
+def uniswap_address():
     yield "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D"
 
 
 @pytest.fixture
-def sushi_address():
+def sushiswap_address():
     yield "0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F"
 
 

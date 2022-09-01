@@ -55,7 +55,7 @@ def test_profitable_harvest(
     gov,
     amount,
     RELATIVE_APPROX,
-    comp_token,
+    reward_token,
     comp_whale,
 ):
     # Deposit to the vault
@@ -71,9 +71,9 @@ def test_profitable_harvest(
     assert pytest.approx(strategy.estimatedTotalAssets(), rel=RELATIVE_APPROX) == amount
 
     # Strategy earned reward tokens
-    comp_token.transfer(
-        strategy, 2 * strategy.minCompToClaimOrSell(), {"from": comp_whale}
-    )
+    # reward_token.transfer(
+    #     strategy, 2 * strategy.minRewardTokenToClaimOrSell(), {"from": comp_whale}
+    # )
     # Disable trade factory so strategy can swap reward tokens to want tokens using sushiswap as fallback option
     strategy.removeTradeFactoryPermissions({"from": gov})
 
