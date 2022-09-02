@@ -40,17 +40,33 @@ def keeper(accounts):
 
 @pytest.fixture
 def token():
-    token_address = "0xdAC17F958D2ee523a2206206994597C13D831ec7"  # USDT
+    # token_address = "0xdAC17F958D2ee523a2206206994597C13D831ec7"  # USDT
     # token_address = "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"  # USDC
+    token_address = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"  # WETH
     yield Contract(token_address)
 
 
 @pytest.fixture
 def token_whale(accounts):
-    yield accounts.at(
-        "0x5754284f345afc66a98fbb0a0afe71e0f007b949", force=True
-    )  # Reserve = Tether: Treasury
+    # yield accounts.at( "0x5754284f345afc66a98fbb0a0afe71e0f007b949", force=True)  # Tether Treasury
     # yield accounts.at("0x55fe002aeff02f77364de339a1292923a15844b8", force=True) #Reserve = Circle
+    yield accounts.at("0x2f0b23f53734252bda2277357e97e1517d6b042a", force=True)  # Maker
+
+
+@pytest.fixture
+def usdt():
+    token_address = "0xdAC17F958D2ee523a2206206994597C13D831ec7"  # USDT
+    yield Contract(token_address)
+
+
+@pytest.fixture
+def usdt_amount(accounts, usdt, user):
+    amount = 10_000 * 10 ** usdt.decimals()
+    # In order to get some funds for the token you are about to use,
+    # it impersonate an exchange address to use it's funds.
+    reserve = accounts.at("0x5754284f345afc66a98fbb0a0afe71e0f007b949", force=True)
+    usdt.transfer(user, amount, {"from": reserve})
+    yield amount
 
 
 @pytest.fixture
@@ -65,8 +81,9 @@ def amount(accounts, token, user, token_whale):
 
 @pytest.fixture
 def poolToken():
-    token_address = "0x3Ed3B47Dd13EC9a98b44e6204A523E766B225811"  # aUSDT
+    # token_address = "0x3Ed3B47Dd13EC9a98b44e6204A523E766B225811"  # aUSDT
     # token_address = "0xBcca60bB61934080951369a648Fb03DF4F96263C" #aUSDC
+    token_address = "0x030bA81f1c18d280636F32af80b9AAd02Cf0854e"  # aWETH
     yield Contract(token_address)
 
 

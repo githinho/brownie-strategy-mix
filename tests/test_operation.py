@@ -69,7 +69,7 @@ def test_profitable_harvest(
     before_pps = vault.pricePerShare()
 
     # increase lending interest
-    chain.sleep(100 * 24 * 3600)
+    chain.sleep(3600 * 24 * 30)
     chain.mine(1)
 
     # Harvest 2: Realize profit
@@ -109,7 +109,9 @@ def test_change_debt(
     assert pytest.approx(strategy.estimatedTotalAssets(), rel=RELATIVE_APPROX) == half
 
 
-def test_sweep(gov, vault, strategy, token, user, amount, weth, weth_amount):
+def test_sweep(
+    gov, vault, strategy, token, user, amount, weth, weth_amount, usdt, usdt_amount
+):
     # Strategy want token doesn't work
     token.transfer(strategy, amount, {"from": user})
     assert token.address == strategy.want()
@@ -126,12 +128,12 @@ def test_sweep(gov, vault, strategy, token, user, amount, weth, weth_amount):
     # with brownie.reverts("!protected"):
     #     strategy.sweep(strategy.protectedToken(), {"from": gov})
 
-    before_balance = weth.balanceOf(gov)
-    weth.transfer(strategy, weth_amount, {"from": user})
-    assert weth.address != strategy.want()
-    assert weth.balanceOf(user) == 0
-    strategy.sweep(weth, {"from": gov})
-    assert weth.balanceOf(gov) == weth_amount + before_balance
+    before_balance = usdt.balanceOf(gov)
+    usdt.transfer(strategy, usdt_amount, {"from": user})
+    assert usdt.address != strategy.want()
+    assert usdt.balanceOf(user) == 0
+    strategy.sweep(usdt, {"from": gov})
+    assert usdt.balanceOf(gov) == usdt_amount + before_balance
 
 
 def test_triggers(
