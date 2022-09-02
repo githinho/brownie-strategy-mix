@@ -66,6 +66,7 @@ def amount(accounts, token, user, token_whale):
 @pytest.fixture
 def poolToken():
     token_address = "0x3Ed3B47Dd13EC9a98b44e6204A523E766B225811"  # aUSDT
+    # token_address = "0xBcca60bB61934080951369a648Fb03DF4F96263C" #aUSDC
     yield Contract(token_address)
 
 

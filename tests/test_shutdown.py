@@ -18,10 +18,13 @@ def test_vault_shutdown_can_withdraw(
         token.transfer(token_whale, token.balanceOf(user), {"from": user})
 
     # Harvest 1: Send funds through the strategy
+    chain.sleep(1)
+    chain.mine(1)
     tx = strategy.harvest()
     chain.sleep(3600 * 7)
     chain.mine(1)
-    assert pytest.approx(strategy.estimatedTotalAssets(), rel=RELATIVE_APPROX) == amount
+    # assert pytest.approx(strategy.estimatedTotalAssets(), rel=RELATIVE_APPROX) == amount
+    assert strategy.estimatedTotalAssets() >= amount
 
     ## Set Emergency
     vault.setEmergencyShutdown(True)
@@ -29,7 +32,8 @@ def test_vault_shutdown_can_withdraw(
     ## Withdraw (does it work, do you get what you expect)
     vault.withdraw({"from": user})
 
-    assert pytest.approx(token.balanceOf(user), rel=RELATIVE_APPROX) == amount
+    # assert pytest.approx(token.balanceOf(user), rel=RELATIVE_APPROX) == amount
+    assert token.balanceOf(user) >= amount
 
 
 def test_basic_shutdown(
@@ -41,6 +45,8 @@ def test_basic_shutdown(
     assert token.balanceOf(vault.address) == amount
 
     # Harvest 1: Send funds through the strategy
+    chain.sleep(1)
+    chain.mine(1)
     tx = strategy.harvest()
     chain.mine(100)
     assert pytest.approx(strategy.estimatedTotalAssets(), rel=RELATIVE_APPROX) == amount
@@ -60,7 +66,7 @@ def test_basic_shutdown(
     tx = strategy.harvest()  ## Remove funds from strategy
 
     assert token.balanceOf(strategy) == 0
-    assert (
-        pytest.approx(token.balanceOf(vault), rel=RELATIVE_APPROX) == amount
-    )  ## The vault has all funds
+    ## The vault has all funds
+    # assert (pytest.approx(token.balanceOf(vault), rel=RELATIVE_APPROX) == amount)
+    assert token.balanceOf(vault) >= amount
     ## NOTE: May want to tweak this based on potential loss during migration
