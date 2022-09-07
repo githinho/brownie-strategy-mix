@@ -49,11 +49,11 @@ token_addresses = {
 # TODO: uncomment those tokens you want to test as want
 @pytest.fixture(
     params=[
-        # 'WBTC', # WBTC
+        # "WBTC",  # WBTC
         # "WETH",  # WETH
-        'USDT', # USDT
-        # 'DAI', # DAI
-        # 'USDC', # USDC
+        "USDT",  # USDT
+        # "DAI",  # DAI
+        # "USDC",  # USDC
     ],
     scope="session",
     autouse=True,
@@ -70,9 +70,10 @@ whale_addresses = {
     "USDC": "0x0a59649758aa4d66e25f08dd01271e891fe52199",
 }
 
+
 @pytest.fixture(scope="session", autouse=True)
 def token_whale(accounts, token):
-    yield accounts.at(whale_addresses[token.symbol()], force = True)
+    yield accounts.at(whale_addresses[token.symbol()], force=True)
 
 
 token_prices = {
@@ -82,6 +83,7 @@ token_prices = {
     "USDC": 1,
     "DAI": 1,
 }
+
 
 @pytest.fixture(autouse=True)
 def amount(token, token_whale, user):
@@ -96,7 +98,7 @@ def amount(token, token_whale, user):
     yield amount
 
 
-pool_token_addresses = {
+aave_pool_token_addresses = {
     "WBTC": "0x9ff58f4fFB29fA2266Ab25e75e2A8b3503311656",  # aWBTC
     "WETH": "0x030bA81f1c18d280636F32af80b9AAd02Cf0854e",  # aWETH
     "USDT": "0x3Ed3B47Dd13EC9a98b44e6204A523E766B225811",  # aUSDT
@@ -104,9 +106,10 @@ pool_token_addresses = {
     "USDC": "0xBcca60bB61934080951369a648Fb03DF4F96263C",  # aUSDC
 }
 
+
 @pytest.fixture(scope="session", autouse=True)
 def poolToken(token):
-    yield pool_token_addresses[token.symbol()]
+    yield aave_pool_token_addresses[token.symbol()]
 
 
 @pytest.fixture
