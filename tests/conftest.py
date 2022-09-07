@@ -51,7 +51,7 @@ token_addresses = {
     params=[
         # 'WBTC', # WBTC
         # "WETH",  # WETH
-        # 'USDT', # USDT
+        'USDT', # USDT
         # 'DAI', # DAI
         # 'USDC', # USDC
     ],
