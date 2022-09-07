@@ -107,6 +107,7 @@ def vault(pm, gov, rewards, guardian, management, token):
     vault.initialize(token, gov, rewards, "", "", guardian, management)
     vault.setDepositLimit(2**256 - 1, {"from": gov})
     vault.setManagement(management, {"from": gov})
+    vault.setManagementFee(0, {"from": gov})
     yield vault
 
 
