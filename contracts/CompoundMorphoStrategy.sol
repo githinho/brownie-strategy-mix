@@ -5,28 +5,11 @@
 pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
-// These are the core Yearn libraries
-import {
-    BaseStrategy,
-    StrategyParams
-} from "@yearnvaults/contracts/BaseStrategy.sol";
-import {
-    SafeERC20,
-    SafeMath,
-    IERC20,
-    Address
-} from "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
-import "@openzeppelin/contracts/math/Math.sol";
-
-import "./Strategy.sol";
+import "./MorphoStrategy.sol";
 import "../interfaces/IUniswapV2Router01.sol";
 import "../interfaces/ySwap/ITradeFactory.sol";
 
-contract CompoundStrategy is Strategy {
-    using SafeERC20 for IERC20;
-    using Address for address;
-    using SafeMath for uint256;
-
+contract CompoundMorphoStrategy is MorphoStrategy {
     //ySwap TradeFactory:
     address public tradeFactory;
     // COMP = Compound token
@@ -47,7 +30,7 @@ contract CompoundStrategy is Strategy {
         string memory _strategyName
     )
         public
-        Strategy(
+        MorphoStrategy(
             _vault,
             _poolToken,
             _strategyName,

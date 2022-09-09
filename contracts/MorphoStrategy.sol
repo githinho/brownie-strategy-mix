@@ -21,7 +21,7 @@ import "@openzeppelin/contracts/math/Math.sol";
 import "../interfaces/IMorpho.sol";
 import "../interfaces/ILens.sol";
 
-abstract contract Strategy is BaseStrategy {
+abstract contract MorphoStrategy is BaseStrategy {
     using SafeERC20 for IERC20;
     using Address for address;
     using SafeMath for uint256;

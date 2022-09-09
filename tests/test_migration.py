@@ -11,7 +11,7 @@ def test_migration(
     vault,
     strategy,
     amount,
-    CompoundStrategy,
+    CompoundMorphoStrategy,
     strategist,
     gov,
     user,
@@ -27,7 +27,7 @@ def test_migration(
 
     # migrate to a new strategy
     new_strategy = strategist.deploy(
-        CompoundStrategy, vault, poolToken, "StrategyMorpho2" + token.symbol()
+        CompoundMorphoStrategy, vault, poolToken, "StrategyMorpho2" + token.symbol()
     )
     vault.migrateStrategy(strategy, new_strategy, {"from": gov})
     assert (
