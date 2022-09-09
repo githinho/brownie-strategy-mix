@@ -7,7 +7,7 @@ pragma experimental ABIEncoderV2;
 
 import "./MorphoStrategy.sol";
 
-contract AaveMorphoStrategy is MorphoStrategy {
+contract MorphoAaveStrategy is MorphoStrategy {
     constructor(
         address _vault,
         address _poolToken,

@@ -9,7 +9,7 @@ import "./MorphoStrategy.sol";
 import "../interfaces/IUniswapV2Router01.sol";
 import "../interfaces/ySwap/ITradeFactory.sol";
 
-contract CompoundMorphoStrategy is MorphoStrategy {
+contract MorphoCompoundStrategy is MorphoStrategy {
     //ySwap TradeFactory:
     address public tradeFactory;
     // COMP = Compound token
