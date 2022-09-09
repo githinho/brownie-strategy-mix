@@ -165,14 +165,14 @@ def strategy(
     keeper,
     vault,
     poolToken,
-    Strategy,
+    CompoundStrategy,
     gov,
     trade_factory,
     ymechs_safe,
     token,
 ):
     strategy = strategist.deploy(
-        Strategy, vault, poolToken, "StrategyMorpho" + token.symbol()
+        CompoundStrategy, vault, poolToken, "StrategyMorpho" + token.symbol()
     )
     strategy.setKeeper(keeper)
     vault.addStrategy(strategy, 10_000, 0, 2**256 - 1, 1_000, {"from": gov})
